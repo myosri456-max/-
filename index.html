@@ -1,0 +1,2173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>مدير المهام والسجلات</title>
+
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#0a2540">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مدير المهام">
+<meta name="description" content="تطبيق إدارة المهام والسجلات وسجل الطلاب">
+
+<!-- Manifest inline via JS (no separate file needed) -->
+<script>
+  const manifestData = {
+    name: "مدير المهام والسجلات",
+    short_name: "مدير المهام",
+    description: "تطبيق إدارة المهام والسجلات وسجل الطلاب",
+    start_url: "./",
+    display: "standalone",
+    background_color: "#0a2540",
+    theme_color: "#0a2540",
+    dir: "rtl",
+    lang: "ar",
+    orientation: "portrait-primary",
+    icons: [
+      { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230a2540'/><text x='96' y='130' font-size='100' text-anchor='middle'>📋</text></svg>", sizes: "192x192", type: "image/svg+xml" },
+      { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%230a2540'/><text x='256' y='340' font-size='260' text-anchor='middle'>📋</text></svg>", sizes: "512x512", type: "image/svg+xml" }
+    ]
+  };
+<link rel="manifest" href="manifest.json">
+</script>
+
+<!-- Apple touch icon inline -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='30' fill='%230a2540'/><text x='90' y='125' font-size='90' text-anchor='middle'>📋</text></svg>">
+
+<!-- Font: system Arabic fonts - fully offline -->
+<style>
+  :root {
+    --blue-dark: #0a2540;
+    --blue-main: #1a56db;
+    --blue-mid: #1e429f;
+    --blue-light: #3b82f6;
+    --blue-pale: #dbeafe;
+    --blue-ultra: #eff6ff;
+    --white: #ffffff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-400: #94a3b8;
+    --gray-600: #475569;
+    --gray-800: #1e293b;
+    --green: #10b981;
+    --red: #ef4444;
+    --orange: #f59e0b;
+    --shadow-sm: 0 1px 3px rgba(10,37,64,0.08);
+    --shadow-md: 0 4px 16px rgba(10,37,64,0.12);
+    --shadow-lg: 0 8px 32px rgba(10,37,64,0.18);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, 'Arabic Typesetting', Arial, sans-serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+    color: white;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    box-shadow: var(--shadow-lg);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 20px;
+  }
+
+  .stat-badge {
+    background: rgba(255,255,255,0.12);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ===== NAV TABS ===== */
+  .nav-tabs {
+    background: white;
+    border-bottom: 2px solid var(--gray-100);
+    display: flex;
+    padding: 0 24px;
+    gap: 4px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .tab-btn {
+    padding: 14px 24px;
+    border: none;
+    background: none;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gray-400);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tab-btn:hover { color: var(--blue-main); }
+
+  .tab-btn.active {
+    color: var(--blue-main);
+    border-bottom-color: var(--blue-main);
+  }
+
+  /* ===== MAIN ===== */
+  main {
+    width: 100%;
+    padding: 20px 16px;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ===== SECTION HEADER ===== */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--blue-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--blue-main);
+    color: white;
+    box-shadow: 0 4px 12px rgba(26,86,219,0.3);
+  }
+
+  .btn-primary:hover {
+    background: var(--blue-mid);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(26,86,219,0.4);
+  }
+
+  .btn-outline {
+    background: white;
+    color: var(--blue-main);
+    border: 2px solid var(--blue-pale);
+  }
+
+  .btn-outline:hover { border-color: var(--blue-main); background: var(--blue-ultra); }
+
+  .btn-danger { background: var(--red); color: white; }
+  .btn-danger:hover { background: #dc2626; }
+
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,37,64,0.5);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    padding: 20px;
+  }
+
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .modal {
+    background: white;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: var(--shadow-lg);
+    animation: slideUp 0.25s;
+    overflow: hidden;
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+
+  .modal-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .modal-close:hover { background: rgba(255,255,255,0.25); }
+
+  .modal-body { padding: 24px; }
+
+  /* ===== FORM ===== */
+  .form-group { margin-bottom: 16px; }
+
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gray-600);
+    margin-bottom: 6px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-size: 14px;
+    color: var(--gray-800);
+    transition: border-color 0.2s;
+    background: var(--gray-50);
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: var(--blue-light);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+  }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-100);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  /* ===== CATEGORIES ===== */
+  .categories-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .cat-chip {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .cat-chip.all {
+    background: var(--blue-main);
+    color: white;
+  }
+
+  .cat-chip:not(.all) {
+    background: white;
+    color: var(--gray-600);
+    border-color: var(--gray-200);
+  }
+
+  .cat-chip:not(.all):hover {
+    border-color: var(--blue-light);
+    color: var(--blue-main);
+  }
+
+  .cat-chip.active-cat {
+    background: var(--blue-pale);
+    color: var(--blue-mid);
+    border-color: var(--blue-light);
+  }
+
+  /* ===== TASK CARDS ===== */
+  .tasks-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .task-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    border: 2px solid var(--gray-100);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+    animation: slideUp 0.2s;
+  }
+
+  .task-card:hover {
+    border-color: var(--blue-pale);
+    box-shadow: var(--shadow-md);
+    transform: translateX(-2px);
+  }
+
+  .task-card.done {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    opacity: 0.8;
+  }
+
+  .task-card.done .task-title { text-decoration: line-through; color: var(--gray-400); }
+
+  .task-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2.5px solid var(--blue-light);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s;
+    background: white;
+  }
+
+  .task-check:hover { background: var(--blue-pale); }
+
+  .task-card.done .task-check {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  .task-content { flex: 1; }
+
+  .task-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: var(--gray-800); }
+
+  .task-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .badge-cat { background: var(--blue-pale); color: var(--blue-mid); }
+  .badge-priority-high { background: #fee2e2; color: #b91c1c; }
+  .badge-priority-medium { background: #fef3c7; color: #92400e; }
+  .badge-priority-low { background: #dcfce7; color: #166534; }
+
+  .task-date { font-size: 12px; color: var(--gray-400); }
+
+  .task-actions { display: flex; gap: 6px; }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+
+  .icon-btn-edit { background: var(--blue-ultra); color: var(--blue-main); }
+  .icon-btn-edit:hover { background: var(--blue-pale); }
+  .icon-btn-del { background: #fff1f2; color: var(--red); }
+  .icon-btn-del:hover { background: #fee2e2; }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray-400);
+  }
+
+  .empty-state .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-state p { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--gray-600); }
+  .empty-state span { font-size: 13px; }
+
+  /* ===== TABLE ===== */
+  .table-wrapper {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+  }
+
+  .table-toolbar {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1;
+    max-width: 300px;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 8px 14px 8px 36px;
+    border: 2px solid var(--gray-200);
+    border-radius: 8px;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-size: 13px;
+    transition: border-color 0.2s;
+    background: var(--gray-50);
+  }
+
+  .search-box input:focus {
+    outline: none;
+    border-color: var(--blue-light);
+    background: white;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    font-size: 14px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    background: var(--blue-dark);
+    color: white;
+    padding: 13px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  th:last-child { text-align: center; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--gray-100);
+    transition: background 0.15s;
+    animation: slideUp 0.2s;
+  }
+
+  tbody tr:hover { background: var(--blue-ultra); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--gray-800);
+  }
+
+  td:last-child { text-align: center; }
+
+  td input {
+    border: none;
+    background: transparent;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  td input:focus {
+    outline: none;
+    background: var(--blue-ultra);
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.3);
+  }
+
+  .row-num {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--blue-main);
+    background: var(--blue-ultra);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: auto;
+  }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--blue-dark);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 9999;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ===== SUMMARY CARDS ===== */
+  .summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .summary-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 18px;
+    border: 2px solid var(--gray-100);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+  }
+
+  .summary-card .num {
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--blue-main);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .summary-card .label {
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 600;
+  }
+
+  .table-footer {
+    padding: 12px 20px;
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-100);
+    font-size: 13px;
+    color: var(--gray-400);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .total-amount {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--blue-mid);
+    background: var(--blue-pale);
+    padding: 4px 14px;
+    border-radius: 20px;
+  }
+
+  /* ===== DARK MODE ===== */
+  body.dark {
+    --blue-pale: #1e3a5f;
+    --blue-ultra: #0f2035;
+    --gray-50: #0f172a;
+    --gray-100: #1e293b;
+    --gray-200: #334155;
+    --gray-400: #94a3b8;
+    --gray-600: #cbd5e1;
+    --gray-800: #f1f5f9;
+    --white: #1e293b;
+    background: #0f172a;
+    color: #f1f5f9;
+  }
+
+  body.dark header { background: linear-gradient(135deg, #020d1a 0%, #061a33 50%, #0d2d5e 100%); }
+
+  body.dark .nav-tabs { background: #1e293b; border-bottom-color: #334155; }
+  body.dark .tab-btn { color: #64748b; }
+  body.dark .tab-btn:hover { color: #93c5fd; }
+  body.dark .tab-btn.active { color: #60a5fa; border-bottom-color: #60a5fa; }
+
+  body.dark main { background: #0f172a; }
+
+  body.dark .summary-card,
+  body.dark .task-card,
+  body.dark .table-wrapper,
+  body.dark .modal,
+  body.dark #theme-card { background: #1e293b; border-color: #334155; }
+
+  body.dark .table-toolbar,
+  body.dark .modal-body,
+  body.dark .modal-footer { background: #1e293b; border-color: #334155; }
+
+  body.dark .task-title { color: #f1f5f9; }
+  body.dark .section-title { -webkit-text-fill-color: #93c5fd; }
+  body.dark .form-control { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+  body.dark .form-control:focus { background: #1e293b; border-color: #60a5fa; }
+  body.dark .form-label { color: #94a3b8; }
+  body.dark td input { color: #f1f5f9; background: transparent; }
+  body.dark td input:focus { background: #0f172a; }
+  body.dark tbody tr:hover { background: #0f2035; }
+  body.dark tbody tr:nth-child(even) { background: #162032; }
+  body.dark .table-footer { background: #162032; border-color: #334155; }
+  body.dark .search-box input { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+  body.dark .btn-outline { background: #1e293b; color: #60a5fa; border-color: #334155; }
+  body.dark .btn-outline:hover { background: #0f2035; border-color: #60a5fa; }
+  body.dark .class-bar { background: linear-gradient(135deg,#0f2035,#162032); border-color: #334155; }
+
+  body.dark #theme-label { color: #f1f5f9; }
+
+  @media (max-width: 600px) {
+    .header-stats { display: none; }
+    .form-row { grid-template-columns: 1fr; }
+    .summary-cards { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ===== HIGH QUALITY UPGRADES ===== */
+
+  /* Smoother animations */
+  @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(26,86,219,0.4); } 50% { box-shadow: 0 0 0 10px rgba(26,86,219,0); } }
+
+  /* Header upgrade */
+  header {
+    background: linear-gradient(135deg, #061a33 0%, #0d2d5e 50%, #1a3a7a 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .logo { text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+
+  .logo-icon {
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.08));
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  /* Nav tabs upgrade */
+  .nav-tabs {
+    background: white;
+    border-bottom: 1px solid var(--gray-200);
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    padding: 16px 20px;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+  }
+
+  /* Cards upgrade */
+  .summary-card {
+    background: white;
+    border: none;
+    box-shadow: 0 2px 12px rgba(10,37,64,0.07);
+    border-radius: 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--blue-main), var(--blue-light));
+    border-radius: 14px 14px 0 0;
+  }
+
+  .summary-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(10,37,64,0.12); }
+
+  /* Task card upgrade */
+  .task-card {
+    border-radius: 14px;
+    border: 1.5px solid var(--gray-100);
+    box-shadow: 0 2px 10px rgba(10,37,64,0.06);
+  }
+
+  /* Table upgrade */
+  .table-wrapper {
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(10,37,64,0.10);
+    border: none;
+    overflow: hidden;
+  }
+
+  th {
+    background: linear-gradient(135deg, #061a33, #0d2d5e);
+    padding: 14px 16px;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  tbody tr:nth-child(even) { background: #fafbff; }
+  tbody tr:hover { background: var(--blue-ultra); }
+
+  td { padding: 11px 14px; }
+
+  td input {
+    font-size: 13px;
+    color: var(--gray-800);
+    width: 100%;
+    padding: 5px 7px;
+    border-radius: 6px;
+  }
+
+  /* Buttons upgrade */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--blue-main), var(--blue-mid));
+    box-shadow: 0 4px 14px rgba(26,86,219,0.35);
+    border-radius: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #1648c4, #163680);
+    box-shadow: 0 6px 18px rgba(26,86,219,0.45);
+  }
+
+  .btn-outline { border-radius: 10px; }
+
+  /* Search box upgrade */
+  .search-box input {
+    border-radius: 10px;
+    padding: 10px 14px 10px 38px;
+    font-size: 13px;
+  }
+
+  /* Section title upgrade */
+  .section-title {
+    font-size: 20px;
+    background: linear-gradient(135deg, var(--blue-dark), var(--blue-main));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Table footer upgrade */
+  .table-footer {
+    background: linear-gradient(to right, #f8faff, #eef3ff);
+    border-top: 1px solid #dde8ff;
+    padding: 14px 20px;
+  }
+
+  .total-amount {
+    background: linear-gradient(135deg, var(--blue-main), var(--blue-mid));
+    color: white;
+    border-radius: 20px;
+    font-size: 13px;
+    padding: 5px 16px;
+  }
+
+  /* Modal upgrade */
+  .modal { border-radius: 20px; }
+  .modal-header { padding: 20px 24px; background: linear-gradient(135deg, #061a33, #1a3a7a); }
+  .modal-body { padding: 20px 24px; }
+
+  /* Class name bar */
+  .class-bar {
+    background: linear-gradient(135deg, #f0f5ff, #e8f0ff);
+    border: 1.5px solid #c7d8ff;
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* ===== FLOATING ADD BUTTON ===== */
+  .fab {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--blue-main), var(--blue-mid));
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 28px;
+    font-size: 15px;
+    font-weight: 800;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(26,86,219,0.5);
+    display: none;
+    align-items: center;
+    gap: 8px;
+    z-index: 200;
+    transition: all 0.25s;
+    animation: fadeInUp 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .fab:hover {
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 10px 30px rgba(26,86,219,0.6);
+  }
+
+  .fab:active { transform: translateX(-50%) scale(0.96); }
+
+  .fab.visible { display: flex; }
+
+  /* Badge upgrade */
+  .badge { border-radius: 8px; font-size: 11px; padding: 3px 10px; }
+
+  /* Row num upgrade */
+  .row-num {
+    background: linear-gradient(135deg, var(--blue-pale), #d4e6ff);
+    color: var(--blue-mid);
+    font-weight: 900;
+    border-radius: 8px;
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+  /* ===== LOCK SCREEN ===== */
+  #lock-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(160deg, #061a33 0%, #0d2d5e 50%, #1a3a7a 100%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    color: white;
+  }
+
+  .lock-logo {
+    font-size: 60px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4));
+  }
+
+  .lock-title {
+    font-size: 22px;
+    font-weight: 900;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+
+  .lock-subtitle {
+    font-size: 13px;
+    opacity: 0.6;
+    margin-bottom: 36px;
+  }
+
+  .pin-dots {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .pin-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+    transition: all 0.2s;
+  }
+
+  .pin-dot.filled {
+    background: white;
+    border-color: white;
+    box-shadow: 0 0 12px rgba(255,255,255,0.5);
+    transform: scale(1.15);
+  }
+
+  .pin-dot.error {
+    background: #ef4444;
+    border-color: #ef4444;
+    animation: shake 0.4s ease;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 72px);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .num-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.15);
+    color: white;
+    font-size: 26px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    backdrop-filter: blur(4px);
+    line-height: 1;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  .num-btn:hover { background: rgba(255,255,255,0.28); transform: scale(1.05); }
+  .num-btn:active { background: rgba(255,255,255,0.4); transform: scale(0.95); }
+
+  .num-btn .sub { font-size: 8px; opacity: 0.7; letter-spacing: 1px; margin-top: 2px; font-weight: 600; }
+
+  .num-btn.del-btn { font-size: 20px; border-color: transparent; background: transparent; }
+  .num-btn.zero-btn { grid-column: 2; }
+
+  .bio-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 26px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    margin-top: 4px;
+  }
+
+  .bio-btn:hover { background: rgba(255,255,255,0.2); }
+  .bio-btn:active { transform: scale(0.92); }
+  .bio-btn.hidden { display: none; }
+
+  .lock-error {
+    height: 22px;
+    font-size: 13px;
+    color: #fca5a5;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  /* ===== FONT SELECTOR ===== */
+  .font-btn {
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .font-btn:hover { background: rgba(255,255,255,0.22); }
+
+  .font-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(6,26,51,0.6);
+    z-index: 5000;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    padding: 0;
+  }
+  .font-modal.open { display: flex; }
+
+  .font-sheet {
+    background: white;
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 480px;
+    padding: 20px;
+    animation: slideUp 0.25s ease;
+  }
+
+  .font-sheet h3 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--blue-dark);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .font-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    border: 2px solid var(--gray-100);
+    transition: all 0.2s;
+  }
+
+  .font-option:hover { border-color: var(--blue-light); background: var(--blue-ultra); }
+  .font-option.selected { border-color: var(--blue-main); background: var(--blue-pale); }
+
+  .font-option .fname { font-size: 15px; font-weight: 700; color: var(--blue-dark); }
+  .font-option .fsample { font-size: 18px; color: var(--gray-600); }
+  .font-option .fcheck { font-size: 18px; color: var(--blue-main); opacity: 0; }
+  .font-option.selected .fcheck { opacity: 1; }
+</style>
+
+</head>
+<body>
+
+<!-- ===== LOCK SCREEN ===== -->
+<div id="lock-screen">
+  <div class="lock-logo">📋</div>
+  <div class="lock-title">مدير المهام</div>
+  <div class="lock-subtitle">أدخل الرقم السري للدخول</div>
+
+  <div class="pin-dots">
+    <div class="pin-dot" id="ld1"></div>
+    <div class="pin-dot" id="ld2"></div>
+    <div class="pin-dot" id="ld3"></div>
+    <div class="pin-dot" id="ld4"></div>
+  </div>
+
+  <div class="lock-error" id="lock-error"></div>
+
+  <div class="numpad">
+    <button class="num-btn" onclick="pinPress('1')">1</button>
+    <button class="num-btn" onclick="pinPress('2')">2<div class="sub">ABC</div></button>
+    <button class="num-btn" onclick="pinPress('3')">3<div class="sub">DEF</div></button>
+    <button class="num-btn" onclick="pinPress('4')">4<div class="sub">GHI</div></button>
+    <button class="num-btn" onclick="pinPress('5')">5<div class="sub">JKL</div></button>
+    <button class="num-btn" onclick="pinPress('6')">6<div class="sub">MNO</div></button>
+    <button class="num-btn" onclick="pinPress('7')">7<div class="sub">PQRS</div></button>
+    <button class="num-btn" onclick="pinPress('8')">8<div class="sub">TUV</div></button>
+    <button class="num-btn" onclick="pinPress('9')">9<div class="sub">WXYZ</div></button>
+    <button class="num-btn zero-btn" onclick="pinPress('0')">0</button>
+    <button class="num-btn del-btn" onclick="pinDel()">⌫</button>
+  </div>
+
+  </div>
+</div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📋</div>
+    مدير المهام
+  </div>
+  <div class="header-stats">
+    <div class="stat-badge">✅ <span id="hdr-done">0</span> منجزة</div>
+    <div class="stat-badge">⏳ <span id="hdr-pending">0</span> معلقة</div>
+    <div class="stat-badge">👥 <span id="hdr-records">0</span> سجل</div>
+    <button id="install-btn" onclick="installApp()" style="display:none;background:rgba(255,255,255,0.18);border:none;color:white;padding:6px 14px;border-radius:20px;font-family:'Segoe UI',Tahoma,Arial,sans-serif;font-size:13px;font-weight:700;cursor:pointer;align-items:center;gap:6px">📲 تثبيت</button>
+  </div>
+</header>
+
+<!-- Nav Tabs -->
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('tasks', this)">📋 المهام</button>
+  <button class="tab-btn" onclick="switchTab('records', this)">📂 السجلات</button>
+  <button class="tab-btn" onclick="switchTab('students', this)">🎓 الطلاب</button>
+  <button class="tab-btn" onclick="switchTab('backup', this)" style="margin-right:auto;color:#10b981">⚙️ الإعدادات</button>
+</div>
+
+<main>
+
+  <!-- ===== TASKS PAGE ===== -->
+  <div class="page active" id="page-tasks">
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="num" id="sum-all">0</div>
+        <div class="label">إجمالي المهام</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="sum-done" style="color:var(--green)">0</div>
+        <div class="label">منجزة</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="sum-pending" style="color:var(--orange)">0</div>
+        <div class="label">معلقة</div>
+      </div>
+      <div class="summary-card">
+        <div class="num" id="sum-high" style="color:var(--red)">0</div>
+        <div class="label">أولوية عالية</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">📋 قائمة المهام</div>
+      <button class="btn btn-primary" onclick="openTaskModal()">＋ إضافة مهمة</button>
+    </div>
+
+    <div class="categories-bar" id="cats-bar">
+      <button class="cat-chip all" onclick="filterCat('all', this)">الكل</button>
+    </div>
+
+    <div class="tasks-grid" id="tasks-list"></div>
+  </div>
+
+  <!-- ===== RECORDS PAGE ===== -->
+  <div class="page" id="page-records">
+    <div class="section-header">
+      <div class="section-title">📂 السجلات</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="printRecords()">🖨️ طباعة</button>
+        <button class="btn btn-primary" onclick="addRecord()">＋ إضافة سجل</button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <div class="table-toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="بحث بالاسم..." oninput="filterRecords(this.value)" id="rec-search">
+        </div>
+        <span style="font-size:13px;color:var(--gray-400);font-weight:600">الخانات قابلة للتعديل المباشر</span>
+      </div>
+
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:50px;text-align:center">#</th>
+              <th style="min-width:180px">الاسم</th>
+              <th style="min-width:160px">رقم الهاتف</th>
+              <th>التاريخ</th>
+              <th>المبلغ / السعر</th>
+              <th style="width:80px">حذف</th>
+            </tr>
+          </thead>
+          <tbody id="records-body"></tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span id="rec-count">0 سجل</span>
+        <span class="total-amount">💰 الإجمالي: <span id="total-amount">0</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STUDENTS PAGE ===== -->
+  <div class="page" id="page-students">
+    <div class="section-header">
+      <div class="section-title">🎓 سجل الطلاب</div>
+      <button class="btn btn-outline btn-sm" onclick="printStudents()">🖨️ طباعة</button>
+    </div>
+
+    <div class="class-bar">
+      <div class="search-box" style="max-width:100%;flex:1">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="بحث باسم الطالب..." oninput="filterStudents(this.value)" id="stu-search"
+          style="width:100%;padding:10px 14px 10px 38px;border:2px solid #c7d8ff;border-radius:10px;font-size:14px;background:white">
+      </div>
+      <span style="font-size:13px;color:var(--blue-mid);font-weight:700;background:white;padding:4px 14px;border-radius:20px;border:1.5px solid #c7d8ff;white-space:nowrap">إجمالي: <strong id="stu-count" style="color:var(--blue-main)">0</strong></span>
+    </div>
+
+    <div class="table-wrapper">
+      <div style="overflow-x:auto" id="stu-print-area">
+        <table id="students-table">
+          <thead>
+            <tr>
+              <th style="width:44px;text-align:center">م</th>
+              <th style="min-width:160px">اسم التلميذ</th>
+              <th style="width:62px;text-align:center">شهر 9</th>
+              <th style="width:62px;text-align:center">شهر 10</th>
+              <th style="width:62px;text-align:center">شهر 11</th>
+              <th style="width:62px;text-align:center">شهر 12</th>
+              <th style="width:62px;text-align:center">شهر 1</th>
+              <th style="width:62px;text-align:center">شهر 2</th>
+              <th style="width:62px;text-align:center">شهر 3</th>
+              <th style="width:62px;text-align:center">شهر 4</th>
+              <th style="width:62px;text-align:center">شهر 5</th>
+              <th style="min-width:120px">مذكرة</th>
+              <th style="min-width:130px">رقم التليفون</th>
+              <th style="width:60px;text-align:center">حذف</th>
+            </tr>
+          </thead>
+          <tbody id="students-body"></tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span id="stu-visible-count">0 طالب</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="addStudent()">＋ إضافة طالب</button>
+          <button class="btn btn-outline btn-sm" onclick="clearAllStudents()" style="color:var(--red);border-color:#fecaca">🗑️ مسح الكل</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== BACKUP PAGE ===== -->
+  <div class="page" id="page-backup">
+    <div class="section-title" style="margin-bottom:6px">⚙️ الإعدادات</div>
+    <p style="font-size:13px;color:var(--gray-600);margin-bottom:24px">إدارة الرقم السري والمظهر وحفظ بياناتك</p>
+
+    <!-- Dark Mode -->
+    <div style="background:white;border-radius:14px;padding:22px;box-shadow:var(--shadow-md);margin-bottom:16px;border:2px solid var(--gray-100)" id="theme-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:40px;height:40px;background:#1e293b;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">🌙</div>
+          <div>
+            <div style="font-size:15px;font-weight:800;color:var(--blue-dark)" id="theme-label">الوضع الفاتح</div>
+            <div style="font-size:12px;color:var(--gray-400)" id="theme-sub">اضغط للتبديل إلى الوضع المظلم</div>
+          </div>
+        </div>
+        <!-- Toggle Switch -->
+        <div onclick="toggleTheme()" id="theme-toggle"
+          style="width:52px;height:28px;border-radius:20px;background:var(--gray-200);cursor:pointer;position:relative;transition:background 0.3s;flex-shrink:0">
+          <div id="theme-knob"
+            style="width:22px;height:22px;border-radius:50%;background:white;position:absolute;top:3px;right:3px;transition:all 0.3s;box-shadow:0 2px 6px rgba(0,0,0,0.2)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change PIN -->
+    <div style="background:white;border-radius:14px;padding:22px;box-shadow:var(--shadow-md);margin-bottom:16px;border:2px solid #ede9fe">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:40px;height:40px;background:#ede9fe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">🔒</div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:var(--blue-dark)">تغيير الرقم السري</div>
+          <div style="font-size:12px;color:var(--gray-400)">رقم الدخول ورقم الحذف</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">الرقم السري الحالي</label>
+        <input class="form-control" id="pin-current" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الرقم السري الجديد</label>
+        <input class="form-control" id="pin-new" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">تأكيد الرقم الجديد</label>
+        <input class="form-control" id="pin-confirm" type="password" inputmode="numeric" maxlength="4" placeholder="••••">
+      </div>
+      <div id="pin-change-msg" style="height:22px;font-size:13px;font-weight:700;margin-top:10px;text-align:center"></div>
+      <button class="btn btn-primary" onclick="changePin()" style="width:100%;justify-content:center;padding:13px;margin-top:4px">
+        🔐 تغيير الرقم السري
+      </button>
+    </div>
+
+    <!-- Export -->
+    <div style="background:white;border-radius:14px;padding:22px;box-shadow:var(--shadow-md);margin-bottom:16px;border:2px solid #d1fae5">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:40px;height:40px;background:#d1fae5;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">📤</div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:var(--blue-dark)">تصدير البيانات</div>
+          <div style="font-size:12px;color:var(--gray-400)">حفظ نسخة احتياطية على هاتفك</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.6">سيتم تحميل ملف يحتوي على جميع بياناتك (المهام، السجلات، الطلاب). احفظه في مكان آمن.</p>
+      <button class="btn btn-primary" onclick="exportData()" style="background:linear-gradient(135deg,#059669,#047857);box-shadow:0 4px 14px rgba(5,150,105,0.35);width:100%;justify-content:center;padding:14px">
+        📥 تحميل النسخة الاحتياطية
+      </button>
+    </div>
+
+    <!-- Import -->
+    <div style="background:white;border-radius:14px;padding:22px;box-shadow:var(--shadow-md);margin-bottom:16px;border:2px solid #dbeafe">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:40px;height:40px;background:#dbeafe;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px">📥</div>
+        <div>
+          <div style="font-size:15px;font-weight:800;color:var(--blue-dark)">استيراد البيانات</div>
+          <div style="font-size:12px;color:var(--gray-400)">استعادة نسخة احتياطية محفوظة</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px;line-height:1.6">اختر ملف النسخة الاحتياطية الذي حملته سابقاً لاستعادة جميع بياناتك.</p>
+      <label style="display:block;background:linear-gradient(135deg,var(--blue-main),var(--blue-mid));color:white;text-align:center;padding:14px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 4px 14px rgba(26,86,219,0.35)">
+        📂 اختر ملف الاستعادة
+        <input type="file" accept=".json" onchange="importData(this)" style="display:none">
+      </label>
+    </div>
+
+    <!-- Info -->
+    <div style="background:#fffbeb;border-radius:14px;padding:18px;border:2px solid #fde68a">
+      <div style="font-size:13px;font-weight:800;color:#92400e;margin-bottom:8px">⚠️ تنبيهات مهمة</div>
+      <ul style="font-size:12px;color:#78350f;line-height:2;padding-right:16px">
+        <li>احفظ نسخة احتياطية <strong>قبل كل تحديث</strong> للتطبيق</li>
+        <li>الاستيراد سيستبدل <strong>جميع البيانات الحالية</strong></li>
+        <li>احفظ الملف في <strong>مجلد التنزيلات</strong> أو Google Drive</li>
+        <li>يُنصح بالنسخ الاحتياطي <strong>أسبوعياً</strong></li>
+      </ul>
+    </div>
+
+    <!-- Last backup info -->
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--gray-400)" id="last-backup-info"></div>
+  </div>
+
+</main>
+
+<!-- ===== TASK MODAL ===== -->
+<div class="modal-overlay" id="task-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="task-modal-title">＋ إضافة مهمة جديدة</div>
+      <button class="modal-close" onclick="closeModal('task-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">عنوان المهمة *</label>
+        <input class="form-control" id="t-title" type="text" placeholder="اكتب عنوان المهمة...">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">التصنيف</label>
+          <input class="form-control" id="t-cat" type="text" placeholder="مثال: عمل، شخصي...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">الأولوية</label>
+          <select class="form-control" id="t-priority">
+            <option value="medium">متوسطة</option>
+            <option value="high">عالية 🔴</option>
+            <option value="low">منخفضة 🟢</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">الموعد النهائي</label>
+          <input class="form-control" id="t-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">الحالة</label>
+          <select class="form-control" id="t-status">
+            <option value="pending">معلقة ⏳</option>
+            <option value="done">منجزة ✅</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">ملاحظات</label>
+        <textarea class="form-control" id="t-notes" rows="2" placeholder="أي تفاصيل إضافية..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('task-modal')">إلغاء</button>
+      <button class="btn btn-primary" onclick="saveTask()">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="modal-overlay" id="pin-modal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-header">
+      <div class="modal-title">🔒 أدخل الرقم السري للحذف</div>
+      <button class="modal-close" onclick="cancelPin()">✕</button>
+    </div>
+    <div class="modal-body" style="text-align:center">
+      <p style="font-size:13px;color:var(--gray-600);margin-bottom:20px">أدخل الرقم السري للمتابعة</p>
+      <div style="display:flex;justify-content:center;gap:10px;margin-bottom:20px">
+        <input id="pin-d1" type="password" maxlength="1" inputmode="numeric"
+          oninput="pinNext(this,'pin-d2')"
+          style="width:52px;height:56px;font-size:24px;font-weight:900;text-align:center;border:2px solid var(--gray-200);border-radius:10px;font-family:'Segoe UI',Tahoma,Arial,sans-serif;outline:none;transition:border-color 0.2s"
+          onfocus="this.style.borderColor='var(--blue-light)'" onblur="this.style.borderColor='var(--gray-200)'">
+        <input id="pin-d2" type="password" maxlength="1" inputmode="numeric"
+          oninput="pinNext(this,'pin-d3')" onkeydown="pinBack(event,this,'pin-d1')"
+          style="width:52px;height:56px;font-size:24px;font-weight:900;text-align:center;border:2px solid var(--gray-200);border-radius:10px;font-family:'Segoe UI',Tahoma,Arial,sans-serif;outline:none;transition:border-color 0.2s"
+          onfocus="this.style.borderColor='var(--blue-light)'" onblur="this.style.borderColor='var(--gray-200)'">
+        <input id="pin-d3" type="password" maxlength="1" inputmode="numeric"
+          oninput="pinNext(this,'pin-d4')" onkeydown="pinBack(event,this,'pin-d2')"
+          style="width:52px;height:56px;font-size:24px;font-weight:900;text-align:center;border:2px solid var(--gray-200);border-radius:10px;font-family:'Segoe UI',Tahoma,Arial,sans-serif;outline:none;transition:border-color 0.2s"
+          onfocus="this.style.borderColor='var(--blue-light)'" onblur="this.style.borderColor='var(--gray-200)'">
+        <input id="pin-d4" type="password" maxlength="1" inputmode="numeric"
+          onkeydown="pinBack(event,this,'pin-d3')" oninput="pinLast(this)"
+          style="width:52px;height:56px;font-size:24px;font-weight:900;text-align:center;border:2px solid var(--gray-200);border-radius:10px;font-family:'Segoe UI',Tahoma,Arial,sans-serif;outline:none;transition:border-color 0.2s"
+          onfocus="this.style.borderColor='var(--blue-light)'" onblur="this.style.borderColor='var(--gray-200)'">
+      </div>
+      <div id="pin-error" style="color:var(--red);font-size:13px;font-weight:700;height:20px;margin-bottom:10px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="cancelPin()">إلغاء</button>
+      <button class="btn btn-danger" onclick="confirmPin()">🗑️ تأكيد الحذف</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ===== LOCK SCREEN =====
+  let currentPin = localStorage.getItem('appPin') || '1708';
+  let lockEntry = '';
+
+  function pinPress(d) {
+    if (lockEntry.length >= 4) return;
+    lockEntry += d;
+    updateDots();
+    if (lockEntry.length === 4) {
+      setTimeout(checkPin, 120);
+    }
+  }
+
+  function pinDel() {
+    lockEntry = lockEntry.slice(0, -1);
+    updateDots();
+    document.getElementById('lock-error').textContent = '';
+  }
+
+  function updateDots() {
+    for (let i = 1; i <= 4; i++) {
+      const d = document.getElementById('ld' + i);
+      d.classList.toggle('filled', i <= lockEntry.length);
+      d.classList.remove('error');
+    }
+  }
+
+  function checkPin() {
+    if (lockEntry === currentPin) {
+      unlockApp();
+    } else {
+      lockEntry = '';
+      for (let i = 1; i <= 4; i++) {
+        const d = document.getElementById('ld' + i);
+        d.classList.remove('filled');
+        d.classList.add('error');
+      }
+      document.getElementById('lock-error').textContent = '❌ الرقم السري غير صحيح';
+      setTimeout(() => {
+        for (let i = 1; i <= 4; i++) document.getElementById('ld' + i).classList.remove('error');
+        document.getElementById('lock-error').textContent = '';
+      }, 1200);
+    }
+  }
+
+  function unlockApp() {
+    const ls = document.getElementById('lock-screen');
+    ls.style.opacity = '0';
+    ls.style.transform = 'scale(1.05)';
+    ls.style.transition = 'all 0.35s ease';
+    setTimeout(() => ls.style.display = 'none', 340);
+  }
+
+  // ===== STATE =====
+  let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+  let records = JSON.parse(localStorage.getItem('records') || '[]');
+  let editingTaskId = null;
+  let currentCat = 'all';
+
+  // ===== TABS =====
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + tab).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ===== TASKS =====
+  function openTaskModal(id = null) {
+    editingTaskId = id;
+    const modal = document.getElementById('task-modal');
+    document.getElementById('task-modal-title').textContent = id ? '✏️ تعديل المهمة' : '＋ إضافة مهمة جديدة';
+    if (id) {
+      const t = tasks.find(x => x.id === id);
+      document.getElementById('t-title').value = t.title;
+      document.getElementById('t-cat').value = t.category || '';
+      document.getElementById('t-priority').value = t.priority;
+      document.getElementById('t-date').value = t.date || '';
+      document.getElementById('t-status').value = t.status;
+      document.getElementById('t-notes').value = t.notes || '';
+    } else {
+      document.getElementById('t-title').value = '';
+      document.getElementById('t-cat').value = '';
+      document.getElementById('t-priority').value = 'medium';
+      document.getElementById('t-date').value = '';
+      document.getElementById('t-status').value = 'pending';
+      document.getElementById('t-notes').value = '';
+    }
+    modal.classList.add('open');
+    setTimeout(() => document.getElementById('t-title').focus(), 100);
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function saveTask() {
+    const title = document.getElementById('t-title').value.trim();
+    if (!title) { showToast('⚠️ يرجى كتابة عنوان المهمة'); return; }
+
+    const task = {
+      id: editingTaskId || Date.now(),
+      title,
+      category: document.getElementById('t-cat').value.trim() || 'عام',
+      priority: document.getElementById('t-priority').value,
+      date: document.getElementById('t-date').value,
+      status: document.getElementById('t-status').value,
+      notes: document.getElementById('t-notes').value.trim(),
+      createdAt: editingTaskId ? (tasks.find(x => x.id === editingTaskId)?.createdAt || Date.now()) : Date.now()
+    };
+
+    if (editingTaskId) {
+      const i = tasks.findIndex(x => x.id === editingTaskId);
+      tasks[i] = task;
+      showToast('✅ تم تعديل المهمة');
+    } else {
+      tasks.unshift(task);
+      showToast('✅ تمت إضافة المهمة');
+    }
+
+    saveTasks();
+    closeModal('task-modal');
+    renderTasks();
+  }
+
+  function toggleTask(id) {
+    const t = tasks.find(x => x.id === id);
+    if (t) {
+      t.status = t.status === 'done' ? 'pending' : 'done';
+      saveTasks();
+      renderTasks();
+    }
+  }
+
+  function deleteTask(id) {
+    requestPin('task', id);
+  }
+
+  function filterCat(cat, btn) {
+    currentCat = cat;
+    document.querySelectorAll('.cat-chip').forEach(c => {
+      c.classList.remove('active-cat', 'all');
+    });
+    if (cat === 'all') btn.classList.add('all');
+    else btn.classList.add('active-cat');
+    renderTasks(false);
+  }
+
+  function renderTasks(rebuildCats = true) {
+    const list = document.getElementById('tasks-list');
+    const cats = [...new Set(tasks.map(t => t.category))].filter(Boolean);
+
+    if (rebuildCats) {
+      const bar = document.getElementById('cats-bar');
+      bar.innerHTML = `<button class="cat-chip ${currentCat === 'all' ? 'all' : ''}" onclick="filterCat('all', this)">الكل (${tasks.length})</button>`;
+      cats.forEach(cat => {
+        const count = tasks.filter(t => t.category === cat).length;
+        bar.innerHTML += `<button class="cat-chip ${currentCat === cat ? 'active-cat' : ''}" onclick="filterCat('${cat}', this)">${cat} (${count})</button>`;
+      });
+    }
+
+    const filtered = currentCat === 'all' ? tasks : tasks.filter(t => t.category === currentCat);
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>لا توجد مهام</p><span>اضغط "إضافة مهمة" للبدء</span></div>`;
+    } else {
+      const priMap = { high: 'عالية 🔴', medium: 'متوسطة 🟡', low: 'منخفضة 🟢' };
+      const priClass = { high: 'badge-priority-high', medium: 'badge-priority-medium', low: 'badge-priority-low' };
+      list.innerHTML = filtered.map(t => `
+        <div class="task-card ${t.status === 'done' ? 'done' : ''}">
+          <div class="task-check" onclick="toggleTask(${t.id})">${t.status === 'done' ? '✓' : ''}</div>
+          <div class="task-content">
+            <div class="task-title">${t.title}</div>
+            <div class="task-meta">
+              <span class="badge badge-cat">${t.category}</span>
+              <span class="badge ${priClass[t.priority]}">${priMap[t.priority]}</span>
+              ${t.date ? `<span class="task-date">📅 ${t.date}</span>` : ''}
+              ${t.notes ? `<span class="task-date">📝 ${t.notes}</span>` : ''}
+            </div>
+          </div>
+          <div class="task-actions">
+            <button class="icon-btn icon-btn-edit" onclick="openTaskModal(${t.id})" title="تعديل">✏️</button>
+            <button class="icon-btn icon-btn-del" onclick="deleteTask(${t.id})" title="حذف">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    updateStats();
+  }
+
+  function updateStats() {
+    const done = tasks.filter(t => t.status === 'done').length;
+    const pending = tasks.filter(t => t.status !== 'done').length;
+    const high = tasks.filter(t => t.priority === 'high' && t.status !== 'done').length;
+    document.getElementById('sum-all').textContent = tasks.length;
+    document.getElementById('sum-done').textContent = done;
+    document.getElementById('sum-pending').textContent = pending;
+    document.getElementById('sum-high').textContent = high;
+    document.getElementById('hdr-done').textContent = done;
+    document.getElementById('hdr-pending').textContent = pending;
+    document.getElementById('hdr-records').textContent = records.length;
+  }
+
+  function saveTasks() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
+
+  // ===== RECORDS =====
+  function addRecord() {
+    const id = Date.now();
+    records.push({ id, name: '', phone: '', date: '', amount: '' });
+    saveRecords();
+    renderRecords();
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('#records-body tr:first-child td input');
+      if (inputs[0]) inputs[0].focus();
+    }, 50);
+  }
+
+  function updateRecord(id, field, val) {
+    const r = records.find(x => x.id === id);
+    if (r) { r[field] = val; saveRecords(); updateTotals(); }
+  }
+
+  function deleteRecord(id) {
+    requestPin('record', id);
+  }
+
+  function filterRecords(q) {
+    renderRecords(q.toLowerCase());
+  }
+
+  function renderRecords(q = '') {
+    const tbody = document.getElementById('records-body');
+    const filtered = q ? records.filter(r => (r.name || '').toLowerCase().includes(q)) : records;
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--gray-400);font-size:14px">لا توجد سجلات. اضغط "إضافة سجل" للبدء</td></tr>`;
+    } else {
+      tbody.innerHTML = filtered.map((r, i) => `
+        <tr>
+          <td><div class="row-num">${i + 1}</div></td>
+          <td><input value="${r.name||''}" placeholder="أدخل الاسم..." oninput="updateRecord(${r.id},'name',this.value)" style="min-width:160px"></td>
+          <td><input value="${r.phone||''}" placeholder="05xxxxxxxx" oninput="updateRecord(${r.id},'phone',this.value)" type="tel" style="min-width:150px"></td>
+          <td><input value="${r.date||''}" type="date" oninput="updateRecord(${r.id},'date',this.value)"></td>
+          <td><input value="${r.amount||''}" placeholder="0.00" oninput="updateRecord(${r.id},'amount',this.value)" type="number" style="max-width:100px"></td>
+          <td><button class="icon-btn icon-btn-del" onclick="deleteRecord(${r.id})" title="حذف">🗑️</button></td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('rec-count').textContent = `${filtered.length} سجل`;
+    updateTotals();
+    document.getElementById('hdr-records').textContent = records.length;
+  }
+
+  function updateTotals() {
+    const total = records.reduce((s, r) => s + (parseFloat(r.amount) || 0), 0);
+    document.getElementById('total-amount').textContent = total.toLocaleString('ar-EG') + ' جنيه';
+  }
+
+  function printRecords() {
+    const rows = records.map((r, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${r.name||''}</td>
+        <td>${r.phone||''}</td>
+        <td>${r.date||''}</td>
+        <td>${(parseFloat(r.amount)||0).toLocaleString('ar-EG')} جنيه</td>
+      </tr>
+    `).join('');
+    const total = records.reduce((s, r) => s + (parseFloat(r.amount)||0), 0);
+    const printWin = window.open('', '_blank');
+    printWin.document.write(`
+      <!DOCTYPE html><html lang="ar" dir="rtl"><head>
+      <meta charset="UTF-8">
+      <title>السجلات</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h2 { text-align:center; margin-bottom:16px; font-size:18px; }
+        table { width:100%; border-collapse:collapse; }
+        th, td { border:1px solid #333; padding:8px 12px; text-align:right; font-size:13px; }
+        th { background:#0a2540; color:white; }
+        tr:nth-child(even) { background:#f0f4ff; }
+        .total { text-align:left; margin-top:12px; font-size:14px; font-weight:bold; }
+      </style></head><body>
+      <h2>السجلات</h2>
+      <table>
+        <thead><tr><th>#</th><th>الاسم</th><th>رقم الهاتف</th><th>التاريخ</th><th>المبلغ</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="total">الإجمالي: ${total.toLocaleString('ar-EG')} جنيه</div>
+      </body></html>
+    `);
+    printWin.document.close();
+    printWin.print();
+  }
+
+  function saveRecords() { localStorage.setItem('records', JSON.stringify(records)); }
+
+  // ===== STUDENTS =====
+  let students = JSON.parse(localStorage.getItem('students') || '[]');
+
+  function addStudent() {
+    const id = Date.now();
+    students.push({ id, name: '', sh9:'', sh10:'', sh11:'', sh12:'', sh1:'', sh2:'', sh3:'', sh4:'', sh5:'', note:'', phone:'' });
+    saveStudents();
+    renderStudents();
+    setTimeout(() => {
+      const rows = document.querySelectorAll('#students-body tr');
+      const lastRow = rows[rows.length - 1];
+      if (lastRow) {
+        const inp = lastRow.querySelector('input');
+        if (inp) inp.focus();
+      }
+    }, 60);
+  }
+
+  function updateStudent(id, field, val) {
+    const s = students.find(x => x.id === id);
+    if (s) { s[field] = val; saveStudents(); }
+  }
+
+  function deleteStudent(id) {
+    requestPin('student', id);
+  }
+
+  function clearAllStudents() {
+    requestPin('all-students', null);
+  }
+
+  function filterStudents(q) {
+    renderStudents(q.toLowerCase());
+  }
+
+  function renderStudents(q = '') {
+    const tbody = document.getElementById('students-body');
+    const filtered = q ? students.filter(s => (s.name || '').toLowerCase().includes(q)) : students;
+
+    document.getElementById('stu-count').textContent = students.length;
+    document.getElementById('stu-visible-count').textContent = `${filtered.length} طالب`;
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="14" style="text-align:center;padding:40px;color:var(--gray-400);font-size:14px">لا يوجد طلاب. اضغط "إضافة طالب" للبدء</td></tr>`;
+      return;
+    }
+
+    const shStyle = 'text-align:center;width:52px';
+    const shInput = 'text-align:center;width:44px';
+    tbody.innerHTML = filtered.map((s, i) => `
+      <tr>
+        <td><div class="row-num">${i + 1}</div></td>
+        <td><input value="${s.name||''}" placeholder="اسم الطالب..." oninput="updateStudent(${s.id},'name',this.value)" style="min-width:140px"></td>
+        <td style="${shStyle}"><input value="${s.sh9||''}"  placeholder="-" oninput="updateStudent(${s.id},'sh9',this.value)"  style="${shInput}"></td>
+        <td style="${shStyle}"><input value="${s.sh10||''}" placeholder="-" oninput="updateStudent(${s.id},'sh10',this.value)" style="${shInput}"></td>
+        <td style="${shStyle}"><input value="${s.sh11||''}" placeholder="-" oninput="updateStudent(${s.id},'sh11',this.value)" style="${shInput}"></td>
+        <td style="${shStyle}"><input value="${s.sh12||''}" placeholder="-" oninput="updateStudent(${s.id},'sh12',this.value)" style="${shInput}"></td>
+        <td style="${shStyle}"><input value="${s.sh1||''}"  placeholder="-" oninput="updateStudent(${s.id},'sh1',this.value)"  style="${shInput}"></td>
+        <td style="${shStyle}"><input value="${s.sh2||''}"  placeholder="-" oninput="updateStudent(${s.id},'sh2',this.value)"  style="${shInput}"></td>
+        <td style="${shStyle}"><input value="${s.sh3||''}"  placeholder="-" oninput="updateStudent(${s.id},'sh3',this.value)"  style="${shInput}"></td>
+        <td style="${shStyle}"><input value="${s.sh4||''}"  placeholder="-" oninput="updateStudent(${s.id},'sh4',this.value)"  style="${shInput}"></td>
+        <td style="${shStyle}"><input value="${s.sh5||''}"  placeholder="-" oninput="updateStudent(${s.id},'sh5',this.value)"  style="${shInput}"></td>
+        <td><input value="${s.note||''}"  placeholder="مذكرة..." oninput="updateStudent(${s.id},'note',this.value)"  style="min-width:110px"></td>
+        <td><input value="${s.phone||''}" placeholder="05xxxxxxxx" oninput="updateStudent(${s.id},'phone',this.value)" type="tel" style="min-width:120px"></td>
+        <td><button class="icon-btn icon-btn-del" onclick="deleteStudent(${s.id})" title="حذف">🗑️</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function saveStudents() {
+    localStorage.setItem('students', JSON.stringify(students));
+  }
+
+  function printStudents() {
+    const className = document.getElementById('class-name')?.value || '';
+    const printWin = window.open('', '_blank');
+    const rows = students.map((s, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${s.name||''}</td>
+        <td>${s.sh9||''}</td>
+        <td>${s.sh10||''}</td>
+        <td>${s.sh11||''}</td>
+        <td>${s.sh12||''}</td>
+        <td>${s.sh1||''}</td>
+        <td>${s.sh2||''}</td>
+        <td>${s.sh3||''}</td>
+        <td>${s.sh4||''}</td>
+        <td>${s.sh5||''}</td>
+        <td>${s.note||''}</td>
+        <td>${s.phone||''}</td>
+      </tr>
+    `).join('');
+
+    printWin.document.write(`
+      <!DOCTYPE html><html lang="ar" dir="rtl"><head>
+      <meta charset="UTF-8">
+      <title>سجل الطلاب${className ? ' - ' + className : ''}</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h2 { text-align:center; margin-bottom:16px; font-size:18px; }
+        table { width:100%; border-collapse:collapse; }
+        th, td { border:1px solid #333; padding:7px 10px; text-align:right; font-size:13px; }
+        th { background:#0a2540; color:white; }
+        tr:nth-child(even) { background:#f0f4ff; }
+      </style></head><body>
+      <h2>سجل الطلاب ${className ? '- ' + className : ''}</h2>
+      <table>
+        <thead><tr><th>م</th><th>اسم التلميذ</th><th>شهر 9</th><th>شهر 10</th><th>شهر 11</th><th>شهر 12</th><th>شهر 1</th><th>شهر 2</th><th>شهر 3</th><th>شهر 4</th><th>شهر 5</th><th>مذكرة</th><th>رقم التليفون</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      </body></html>
+    `);
+    printWin.document.close();
+    printWin.print();
+  }
+
+  // ===== PIN SYSTEM (DELETE) =====
+  let pendingDelete = null;
+
+  function requestPin(type, id) {
+    pendingDelete = { type, id };
+    document.getElementById('pin-d1').value = '';
+    document.getElementById('pin-d2').value = '';
+    document.getElementById('pin-d3').value = '';
+    document.getElementById('pin-d4').value = '';
+    document.getElementById('pin-error').textContent = '';
+    document.getElementById('pin-modal').classList.add('open');
+    setTimeout(() => document.getElementById('pin-d1').focus(), 100);
+  }
+
+  function pinNext(el, nextId) {
+    if (el.value) document.getElementById(nextId).focus();
+  }
+
+  function pinLast(el) {
+    // auto confirm when last digit entered
+    if (el.value) confirmPin();
+  }
+
+  function pinBack(e, el, prevId) {
+    if (e.key === 'Backspace' && !el.value) document.getElementById(prevId).focus();
+  }
+
+  function cancelPin() {
+    pendingDelete = null;
+    document.getElementById('pin-modal').classList.remove('open');
+  }
+
+  function confirmPin() {
+    const entered = document.getElementById('pin-d1').value +
+                    document.getElementById('pin-d2').value +
+                    document.getElementById('pin-d3').value +
+                    document.getElementById('pin-d4').value;
+    if (entered !== currentPin) {
+      document.getElementById('pin-error').textContent = '❌ الرقم السري غير صحيح';
+      document.getElementById('pin-d1').value = '';
+      document.getElementById('pin-d2').value = '';
+      document.getElementById('pin-d3').value = '';
+      document.getElementById('pin-d4').value = '';
+      setTimeout(() => document.getElementById('pin-d1').focus(), 50);
+      return;
+    }
+    // correct pin — execute delete
+    document.getElementById('pin-modal').classList.remove('open');
+    if (!pendingDelete) return;
+    const { type, id } = pendingDelete;
+    pendingDelete = null;
+    if (type === 'task') {
+      tasks = tasks.filter(x => x.id !== id);
+      saveTasks(); renderTasks(); showToast('🗑️ تم حذف المهمة');
+    } else if (type === 'record') {
+      records = records.filter(x => x.id !== id);
+      saveRecords(); renderRecords(); showToast('🗑️ تم حذف السجل');
+    } else if (type === 'student') {
+      students = students.filter(x => x.id !== id);
+      saveStudents(); renderStudents(); showToast('🗑️ تم حذف الطالب');
+    } else if (type === 'all-students') {
+      students = [];
+      saveStudents(); renderStudents(); showToast('🗑️ تم مسح جميع الطلاب');
+    }
+  }
+
+  document.getElementById('pin-modal').addEventListener('click', function(e) {
+    if (e.target === this) cancelPin();
+  });
+
+  // ===== TOAST =====
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ===== CLOSE MODAL ON OUTSIDE CLICK =====
+  document.getElementById('task-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal('task-modal');
+  });
+
+  // ===== INIT =====
+  renderTasks();
+  renderRecords();
+  renderStudents();
+  updateLastBackupInfo();
+
+  // ===== DARK MODE =====
+  let isDark = localStorage.getItem('darkMode') === 'true';
+
+  function applyTheme() {
+    if (isDark) {
+      document.body.classList.add('dark');
+      document.getElementById('theme-toggle').style.background = '#3b82f6';
+      document.getElementById('theme-knob').style.right = 'auto';
+      document.getElementById('theme-knob').style.left = '3px';
+      document.getElementById('theme-label').textContent = 'الوضع المظلم';
+      document.getElementById('theme-sub').textContent = 'اضغط للتبديل إلى الوضع الفاتح';
+      document.querySelector('.lock-logo') && (document.getElementById('lock-screen').style.background = 'linear-gradient(160deg,#020d1a 0%,#061a33 50%,#0d2d5e 100%)');
+    } else {
+      document.body.classList.remove('dark');
+      document.getElementById('theme-toggle').style.background = 'var(--gray-200)';
+      document.getElementById('theme-knob').style.left = 'auto';
+      document.getElementById('theme-knob').style.right = '3px';
+      document.getElementById('theme-label').textContent = 'الوضع الفاتح';
+      document.getElementById('theme-sub').textContent = 'اضغط للتبديل إلى الوضع المظلم';
+    }
+  }
+
+  function toggleTheme() {
+    isDark = !isDark;
+    localStorage.setItem('darkMode', isDark);
+    applyTheme();
+  }
+
+  applyTheme();
+
+  // ===== CHANGE PIN =====
+  function changePin() {
+    const current = document.getElementById('pin-current').value;
+    const newPin  = document.getElementById('pin-new').value;
+    const confirm = document.getElementById('pin-confirm').value;
+    const msg = document.getElementById('pin-change-msg');
+
+    if (current !== currentPin) {
+      msg.style.color = 'var(--red)';
+      msg.textContent = '❌ الرقم السري الحالي غير صحيح';
+      return;
+    }
+    if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+      msg.style.color = 'var(--red)';
+      msg.textContent = '❌ الرقم الجديد يجب أن يكون 4 أرقام';
+      return;
+    }
+    if (newPin !== confirm) {
+      msg.style.color = 'var(--red)';
+      msg.textContent = '❌ الرقمان غير متطابقان';
+      return;
+    }
+    currentPin = newPin;
+    localStorage.setItem('appPin', newPin);
+    document.getElementById('pin-current').value = '';
+    document.getElementById('pin-new').value = '';
+    document.getElementById('pin-confirm').value = '';
+    msg.style.color = 'var(--green)';
+    msg.textContent = '✅ تم تغيير الرقم السري بنجاح';
+    setTimeout(() => msg.textContent = '', 3000);
+  }
+
+  // ===== BACKUP & RESTORE =====
+  function exportData() {
+    const data = {
+      version: '1.0',
+      exportDate: new Date().toLocaleString('ar-EG'),
+      tasks: JSON.parse(localStorage.getItem('tasks') || '[]'),
+      records: JSON.parse(localStorage.getItem('records') || '[]'),
+      students: JSON.parse(localStorage.getItem('students') || '[]')
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const date = new Date().toLocaleDateString('ar-EG').replace(/\//g, '-');
+    a.href = url;
+    a.download = `مدير-المهام-نسخة-${date}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    localStorage.setItem('lastBackup', new Date().toLocaleString('ar-EG'));
+    updateLastBackupInfo();
+    showToast('✅ تم تحميل النسخة الاحتياطية بنجاح');
+  }
+
+  function importData(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.tasks && !data.records && !data.students) {
+          showToast('❌ الملف غير صالح');
+          return;
+        }
+        if (!confirm('سيتم استبدال جميع البيانات الحالية. هل تريد المتابعة؟')) return;
+        if (data.tasks)    { localStorage.setItem('tasks', JSON.stringify(data.tasks)); tasks = data.tasks; }
+        if (data.records)  { localStorage.setItem('records', JSON.stringify(data.records)); records = data.records; }
+        if (data.students) { localStorage.setItem('students', JSON.stringify(data.students)); students = data.students; }
+        renderTasks();
+        renderRecords();
+        renderStudents();
+        showToast('✅ تم استعادة البيانات بنجاح!');
+        input.value = '';
+      } catch(err) {
+        showToast('❌ خطأ في قراءة الملف');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function updateLastBackupInfo() {
+    const last = localStorage.getItem('lastBackup');
+    const el = document.getElementById('last-backup-info');
+    if (el) el.textContent = last ? `آخر نسخة احتياطية: ${last}` : '';
+  }
+
+  // ===== PWA: SERVICE WORKER (OFFLINE) =====
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      const CACHE = 'madir-v1';
+      self.addEventListener('install', e => {
+        e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./'])));
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', e => {
+        e.waitUntil(clients.claim());
+      });
+      self.addEventListener('fetch', e => {
+        e.respondWith(
+          caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+            return res;
+          }).catch(() => caches.match('./'))
+        );
+      });
+    `;
+    const swBlob = new Blob([swCode], {type: 'application/javascript'});
+    const swURL = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swURL).catch(() => {});
+  }
+
+  // ===== PWA: INSTALL BUTTON =====
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('install-btn').style.display = 'flex';
+  });
+
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('install-btn').style.display = 'none';
+    showToast('✅ تم تثبيت التطبيق على الشاشة الرئيسية!');
+  });
+
+  function installApp() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+    } else {
+      showToast('💡 افتح القائمة ← "إضافة إلى الشاشة الرئيسية"');
+    }
+  }
+</script>
+</body>
+</html>
